@@ -2,25 +2,34 @@
 
 pragma solidity ^0.8.0;
 
-contract MooToken {
+import "./IERC20.sol";
+
+contract RewardToken is IERC20 {
     string private _name = 'RewardToken';
     string private _symbol = 'Reward';
     uint8 private _decimals = 18;
-    uint256 private _totalSupply = 1_000_000 * 1e18;
+    uint256 private _totalSupply;
+
+    address public contractOwner;
 
     mapping(address => uint256) private _balances;
     mapping(address => mapping(address => uint256)) private _allowances;
 
-    event Transfer(address indexed _from, address indexed _to, uint256 _value);
-    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-
-    constructor() {
-        _balances[address(0)] = _totalSupply;
-        _transfer(address(0), msg.sender, _totalSupply);
-    }
-
     function name() public view returns (string memory) {
         return _name;
+    }
+
+    constructor() {
+        contractOwner = msg.sender;
+    }
+
+    modifier onlyOwner {
+        require(msg.sender == contractOwner, "Only Owner");
+        _;
+    }
+
+    function transferOwner(address newOwner) public onlyOwner {
+        contractOwner = newOwner;
     }
 
     function symbol() public view returns (string memory) {
@@ -35,7 +44,12 @@ contract MooToken {
         return _totalSupply;
     }
 
-    function balanceOf(address _owner) public view returns (uint256 balance) {
+    function mint(address to, uint256 amount) public onlyOwner {
+        _balances[to] += amount;
+        _totalSupply += amount;
+    }
+
+    function balanceOf(address _owner) public view returns (uint256) {
         return _balances[_owner];
     }
 
