@@ -75,7 +75,7 @@ contract RewardToken is IERC20 {
     }
 
     function approve(address spender, uint256 value) public returns (bool) {
-        address owner = msg.sender;
+        address owner = address(msg.sender);
         _approve(owner, spender, value);
         return true;
     }
